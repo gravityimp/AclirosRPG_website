@@ -3,7 +3,23 @@ const Mob = require('../models/mob.model');
 
 class MobService {
 
-    static async getAllMobs() {
+    static async getAllMobs(query) {
+        const { limit, page } = query;
+        if (Object.keys(query).length !== 0 && page && limit) {
+
+            const _query = {};
+            if (query.name) _query.name = { $regex: query.name, $options: 'i' };
+            if (query.type) _query.type = { $in: query.type };
+            if (query.hostility) _query.hostility = { $in: query.hostility };
+
+            if (query.minLevel || query.maxLevel) {
+                _query.level = { $gte: query.minLevel || 1, $lte: query.maxLevel || 1000 };
+            }
+
+            const result = await Mob.find(_query).limit(limit).skip(page * limit);
+            const lastPage = Math.ceil(await Mob.countDocuments(_query) / limit) - 1;
+            return { data: result, lastPage: lastPage };
+        }
         return await Mob.find().sort({id: 1});
     }
 

@@ -17,26 +17,38 @@ const AdminPlayerList = () => {
     const [page, setPage] = useState<number>(0);
     const [lastPage, setLastPage] = useState<number>(0);
 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const lastElement = useRef<any>();
     const observer = useRef<any>();
 
-    const fetchPlayers = () => {
-        apiClient.get('api/players', {
-            params: {
-                page: page,
-                limit: 20
-            }
-        }).then(res => {
-            setPlayers(res.data.data);
-            setLastPage(res.data.lastPage);
-        }).catch(err => {
-            enqueueSnackbar("Something went wrong", {
-                variant: 'error'
+    const fetchPlayers = async () => {
+        setIsLoading(true);
+        let response: any;
+        try {
+            response = await apiClient.get("api/players", {
+                params: {
+                    page: page,
+                    limit: 20,
+                    ...filter
+                }
             });
-        });
+        } catch (error) {
+
+        }
+        if (page === 0) {
+            setPlayers(response.data.data);
+            setLastPage(response.data.lastPage);
+        } else {
+            setPlayers([...players, ...response.data.data]);
+        }
+
+        setIsLoading(false);
     };
 
     useEffect(() => {
+        if (isLoading) return;
+        if (observer.current) observer.current.disconnect();
         const options = {
             root: document,
         }
@@ -49,7 +61,7 @@ const AdminPlayerList = () => {
         };
         observer.current = new IntersectionObserver(callback, options);
         observer.current.observe(lastElement.current);
-    }, []);
+    }, [isLoading]);
 
     useEffect(() => {
         fetchPlayers();
@@ -61,9 +73,9 @@ const AdminPlayerList = () => {
         apiClient.put(`api/players/${player.uuid}`, {
             ..._player
         }).then(res => {
-            fetchPlayers();
             if(_ban) enqueueSnackbar(`PLAYER BANNED [${player.name}]`, { variant: "success" });
             else enqueueSnackbar(`PLAYER UNBANNED [${player.name}]`, { variant: "success" });
+            setPage(0);
         }).catch(err => {
             enqueueSnackbar("Something went wrong", {
                 variant: 'error'
@@ -77,6 +89,13 @@ const AdminPlayerList = () => {
                 <PlayerFilterComponent filter={filter} setFilter={setFilter} />
             </Box>
             <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                {
+                    players.length === 0 && (
+                        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '16px' }}>
+                            <Typography variant="h4">No Players Found</Typography>
+                        </Box>
+                    )
+                }
                 {players.map((player) => {
                     return (
                        <Paper

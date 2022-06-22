@@ -3,7 +3,18 @@ const Quest = require('../models/quest.model');
 
 class QuestService {
 
-    static async getAllQuests() {
+    static async getAllQuests(query) {
+        const { limit, page } = query;
+        if (Object.keys(query).length !== 0 && page && limit) {
+
+            const _query = {};
+            if (query.name) _query.name = { $regex: query.name, $options: 'i' };
+            if (query.minLevel || query.maxLevel) _query.requiredLevel = { $gte: query.minLevel || 1, $lte: query.maxLevel || 999 };
+
+            const result = await Quest.find(_query).limit(limit).skip(page * limit);
+            const lastPage = Math.ceil(await Quest.countDocuments(_query) / limit) - 1;
+            return { data: result, lastPage: lastPage };
+        }
         return await Quest.find().sort({id: 1});
     }
 

@@ -5,7 +5,7 @@ const UserService = require('../services/userService');
 class PlayerController {
     async getAllPlayers(req, res, next) {
         try {
-            const players = await PlayerService.getAllPlayers();
+            const players = await PlayerService.getAllPlayers(req.query);
             return res.json(players);
         } catch (e) {
             next(e);
@@ -16,6 +16,24 @@ class PlayerController {
         try {
             const player = await PlayerService.getPlayerById(req.params.uuid);
             return res.json(player);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async getPlayerByName(req, res, next) {
+        try {
+            const player = await PlayerService.getPlayerByName(req.params.name);
+            return res.json(player);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async getPlayerRoles(req, res, next) {
+        try {
+            const roles = await PlayerService.getPlayerRoles(req.params.uuid);
+            return res.json(roles);
         } catch (e) {
             next(e);
         }

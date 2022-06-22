@@ -16,8 +16,24 @@ function makeCode() {
 
 class PlayerService {
 
-    static async getAllPlayers() {
-        return await Player.find().sort({ name: 1 });
+    static async getAllPlayers(query) {
+
+        const { limit, page } = query;
+
+        if (Object.keys(query).length !== 0 && page && limit) {
+
+            const _query = {};
+            if (query.name) _query.name = { $regex: query.name, $options: 'i' };
+
+            if (query.minLevel || query.maxLevel) {
+                _query.rpg.level = { $gte: query.minLevel || 1, $lte: query.maxLevel || 1000 };
+            }
+
+            const result = await Player.find(_query).limit(limit).skip(page * limit);
+            const lastPage = Math.ceil(await Player.countDocuments(_query) / limit) - 1;
+            return { data: result, lastPage: lastPage };
+        }
+        return await Player.find().sort({ id: 1 });
     }
 
     static async getPlayerById(uuid) {
@@ -28,9 +44,24 @@ class PlayerService {
         return player;
     }
 
+    static async getPlayerByName(name) {
+        const player = await Player.findOne({ name: name });
+        if (!player) {
+            throw ApiError.NotFoundError(`Player with name ${name} not found`);
+        }
+        return player;
+    }
+
+    static async getPlayerRoles(uuid) {
+        const player = await Player.findOne({ uuid: uuid });
+        if (!player) {
+            throw ApiError.NotFoundError(`Player with uuid ${uuid} not found`);
+        }
+        return player.user.roles;
+    }
+
     static async generatePlayer(player) {
-        const _p = await Player.findOne({name: player.name})
-        console.log(_p)
+        const _p = await Player.findOne({ name: player.name })
         if (_p || _p !== null) {
             throw ApiError.NotFoundError(`Player with name ${player.name} is already registered`);
         }
@@ -65,7 +96,7 @@ class PlayerService {
                 email: uuid,
                 password: 'XD',
                 roles: [
-                    {role: 'user'}
+                    { role: 'user' }
                 ],
                 createdAt: new Date(),
             }
@@ -78,7 +109,7 @@ class PlayerService {
         if (!getPlayer) {
             throw ApiError.NotFoundError(`Player with uuid ${uuid} not found`);
         }
-        return await Player.updateOne({ uuid: uuid }, { ...player, uuid: uuid });
+        return await Player.updateOne({ uuid: uuid }, player);
     }
 
     static async deletePlayer(uuid) {

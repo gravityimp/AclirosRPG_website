@@ -3,7 +3,17 @@ const Npc = require('../models/npc.model');
 
 class NpcService {
 
-    static async getAll() {
+    static async getAll(query) {
+        const { limit, page } = query;
+        if (Object.keys(query).length !== 0 && page && limit) {
+
+            const _query = {};
+            if (query.name) _query.name = { $regex: query.name, $options: 'i' };
+
+            const result = await Npc.find(_query).limit(limit).skip(page * limit);
+            const lastPage = Math.ceil(await Npc.countDocuments(_query) / limit) - 1;
+            return { data: result, lastPage: lastPage };
+        }
         return await Npc.find().sort({id: 1});
     }
 

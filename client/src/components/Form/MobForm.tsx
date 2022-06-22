@@ -7,7 +7,7 @@ import { Item } from "../../services/Item";
 import { Drop, Equipment, Mob } from "../../services/Mob";
 import { minecraftItems } from "../../static/minecraftItems";
 import { minecraftMobs } from "../../static/minecraftMobs";
-import { styles } from "./styles";
+import { styles } from "./newstyles";
 
 interface Props {
     closeModal: () => void;
@@ -44,7 +44,7 @@ const MobForm: FC<Props> = (props) => {
         apiClient.get("api/items").then((res) => {
             setAllItems(res.data);
         });
-    });
+    }, []);
 
     const buildMob = () => {
         const _mob: Mob = {
@@ -91,467 +91,487 @@ const MobForm: FC<Props> = (props) => {
     };
 
     return (
-        <Box sx={styles.box}>
-            <Box sx={styles.formBox}>
-                <form style={{ overflowY: "auto", width: "100%" }}>
-                    <TextField
-                        sx={styles.formInput}
-                        label="Name"
-                        placeholder="Bobby"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">Name:</InputAdornment>
-                            )
-                        }}
-                    />
-                    <Select
-                        defaultValue={"normal"}
-                        value={type}
-                        onChange={(e: any) => setType(e.target.value)}
-                        sx={styles.formInput}
-                    >
-                        <MenuItem value={"normal"}>Normal</MenuItem>
-                        <MenuItem value={"elite"}>Elite</MenuItem>
-                        <MenuItem value={"boss"}>Boss</MenuItem>
-                        <MenuItem value={"special"}>Special</MenuItem>
-                    </Select>
+        <Box
+            sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                overflowY: "auto"
+            }}
+        >
+            <form
+                style={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "start",
+                    alignItems: "center"
+                }}
+            >
+                <TextField
+                    sx={styles.input}
+                    label="Name"
+                    placeholder="Bobby"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">Name:</InputAdornment>
+                        )
+                    }}
+                />
+                <Select
+                    defaultValue={"normal"}
+                    value={type}
+                    onChange={(e: any) => setType(e.target.value)}
+                    sx={styles.input}
+                >
+                    <MenuItem value={"normal"}>Normal</MenuItem>
+                    <MenuItem value={"elite"}>Elite</MenuItem>
+                    <MenuItem value={"boss"}>Boss</MenuItem>
+                    <MenuItem value={"special"}>Special</MenuItem>
+                </Select>
+                <Autocomplete
+                    disableClearable
+                    sx={styles.input}
+                    options={minecraftMobs}
+                    getOptionLabel={(option) => option.name}
+                    value={minecraftMobs.find((m: any) => m.name.toLocaleLowerCase() === mobType.toLocaleLowerCase()) || minecraftMobs[0]}
+                    onChange={(e, v) => setMobType(v?.name.toLocaleLowerCase() || "")}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            variant="outlined"
+                            label="Mob Type"
+                        />
+                    )}
+                />
+                <Select
+                    value={hostility}
+                    label="Hostility"
+                    onChange={(e: any) => setHostility(e.target.value)}
+                    sx={styles.input}
+                >
+                    <MenuItem value={"friendly"}>Friendly</MenuItem>
+                    <MenuItem value={"hostile"}>Hostile</MenuItem>
+                    <MenuItem value={"passive"}>Passive</MenuItem>
+                </Select>
+                <Button
+                    sx={{
+                        ...styles.button,
+                        backgroundColor: isBaby ? "#004FA3" : "#7A7A7A",
+                        ":hover": {
+                            backgroundColor: isBaby ? "#003B7A" : "#474747"
+                        }
+                    }}
+                    variant="contained"
+                    onClick={() => setIsBaby(!isBaby)}
+                >BABY</Button>
+                <TextField
+                    sx={styles.input}
+                    label="Level"
+                    type="number"
+                    value={level}
+                    InputProps={{
+                        inputProps: { min: 1 },
+                        startAdornment: (
+                            <InputAdornment position="start">Level:</InputAdornment>
+                        )
+                    }}
+                    onChange={(e: any) => {
+                        if (e.target.value === "") {
+                            setLevel(1);
+                        } else {
+                            setLevel(parseInt(e.target.value));
+                        }
+                    }}
+                />
+                <TextField
+                    sx={styles.input}
+                    label="Health"
+                    type="number"
+                    value={health}
+                    InputProps={{
+                        inputProps: { min: 1 },
+                        startAdornment: (
+                            <InputAdornment position="start">Health:</InputAdornment>
+                        )
+                    }}
+                    onChange={(e: any) => {
+                        if (e.target.value === "") {
+                            setHealth(1);
+                        } else {
+                            setHealth(parseInt(e.target.value));
+                        }
+                    }}
+                />
+                <TextField
+                    sx={styles.input}
+                    label="Damage"
+                    type="number"
+                    value={damage}
+                    InputProps={{
+                        inputProps: { min: 0 },
+                        startAdornment: (
+                            <InputAdornment position="start">Damage:</InputAdornment>
+                        )
+                    }}
+                    onChange={(e: any) => {
+                        if (e.target.value === "") {
+                            setDamage(0);
+                        } else {
+                            setDamage(parseInt(e.target.value));
+                        }
+                    }}
+                />
+                <Box sx={{ width: '80%', display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                     <Autocomplete
                         disableClearable
-                        sx={styles.formInput}
-                        options={minecraftMobs}
-                        getOptionLabel={(option) => option.name}
-                        defaultValue={minecraftMobs[0] || { id: 0, name: mobType }}
-                        onChange={(e, v) => setMobType(v?.name.toLocaleLowerCase() || "")}
+                        sx={styles.button}
+                        options={minecraftItems}
+                        getOptionLabel={(option) => option.displayName}
+                        value={minecraftItems.find((i: any) => i.displayName.toLocaleLowerCase() === equipment.main)}
+                        onChange={(e, v) => setEquipment({ ...equipment, main: v?.displayName.toLocaleLowerCase() || "air" })}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
                                 variant="outlined"
-                                label="Mob Type"
+                                label="Main Hand"
                             />
                         )}
                     />
-                    <Select
-                        value={hostility}
-                        label="Hostility"
-                        onChange={(e: any) => setHostility(e.target.value)}
-                        sx={styles.formInput}
-                    >
-                        <MenuItem value={"friendly"}>Friendly</MenuItem>
-                        <MenuItem value={"hostile"}>Hostile</MenuItem>
-                        <MenuItem value={"passive"}>Passive</MenuItem>
-                    </Select>
-                    <Button
-                        sx={{
-                            ...styles.formInput,
-                            backgroundColor: isBaby ? "#004FA3" : "#7A7A7A",
-                            ":hover": {
-                                backgroundColor: isBaby ? "#003B7A" : "#474747"
-                            }
-                        }}
-                        variant="contained"
-                        onClick={() => setIsBaby(!isBaby)}
-                    >BABY</Button>
-                    <TextField
-                        sx={styles.formInput}
-                        label="Level"
-                        type="number"
-                        value={level}
-                        InputProps={{
-                            inputProps: { min: 1 },
-                            startAdornment: (
-                                <InputAdornment position="start">Level:</InputAdornment>
-                            )
-                        }}
-                        onChange={(e: any) => {
-                            if (e.target.value === "") {
-                                setLevel(1);
-                            } else {
-                                setLevel(parseInt(e.target.value));
-                            }
-                        }}
+                    <Autocomplete
+                        disableClearable
+                        sx={styles.button}
+                        options={minecraftItems}
+                        getOptionLabel={(option) => option.displayName}
+                        value={minecraftItems.find((i: any) => i.displayName.toLocaleLowerCase() === equipment.off)}
+                        onChange={(e, v) => setEquipment({ ...equipment, off: v?.displayName.toLocaleLowerCase() || "air" })}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                label="Off Hand"
+                            />
+                        )}
                     />
-                    <TextField
-                        sx={styles.formInput}
-                        label="Health"
-                        type="number"
-                        value={health}
-                        InputProps={{
-                            inputProps: { min: 1 },
-                            startAdornment: (
-                                <InputAdornment position="start">Health:</InputAdornment>
-                            )
-                        }}
-                        onChange={(e: any) => {
-                            if (e.target.value === "") {
-                                setHealth(1);
-                            } else {
-                                setHealth(parseInt(e.target.value));
-                            }
-                        }}
+                    <Autocomplete
+                        disableClearable
+                        sx={styles.button}
+                        options={minecraftItems.filter((i) => i?.enchantCategories?.includes("armor_head") || i.name === "air")}
+                        getOptionLabel={(option) => option.displayName}
+                        value={minecraftItems.find((i: any) => i.displayName.toLocaleLowerCase() === equipment.head)}
+                        onChange={(e, v) => setEquipment({ ...equipment, head: v?.displayName.toLocaleLowerCase() || "air" })}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                label="Head"
+                            />
+                        )}
                     />
-                    <TextField
-                        sx={styles.formInput}
-                        label="Damage"
-                        type="number"
-                        value={damage}
-                        InputProps={{
-                            inputProps: { min: 0 },
-                            startAdornment: (
-                                <InputAdornment position="start">Damage:</InputAdornment>
-                            )
-                        }}
-                        onChange={(e: any) => {
-                            if (e.target.value === "") {
-                                setDamage(0);
-                            } else {
-                                setDamage(parseInt(e.target.value));
-                            }
-                        }}
+                    <Autocomplete
+                        disableClearable
+                        sx={styles.button}
+                        options={minecraftItems.filter((i) => i?.enchantCategories?.includes("armor_chest") || i.name === "air")}
+                        getOptionLabel={(option) => option.displayName}
+                        value={minecraftItems.find((i: any) => i.displayName.toLocaleLowerCase() === equipment.chest)}
+                        onChange={(e, v) => setEquipment({ ...equipment, chest: v?.displayName.toLocaleLowerCase() || "air" })}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                label="Chest"
+                            />
+                        )}
                     />
-                    <Stack spacing="8px">
-                        <Autocomplete
-                            sx={styles.formInput}
-                            options={minecraftItems}
-                            getOptionLabel={(option) => option.name}
-                            defaultValue={minecraftItems[0]}
-                            onChange={(e, v) => setEquipment({ ...equipment, main: v?.displayName.toLocaleLowerCase() || "air" })}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="Main Hand"
-                                />
-                            )}
-                        />
-                        <Autocomplete
-                            sx={styles.formInput}
-                            options={minecraftItems}
-                            getOptionLabel={(option) => option.name}
-                            defaultValue={minecraftItems[0]}
-                            onChange={(e, v) => setEquipment({ ...equipment, off: v?.displayName.toLocaleLowerCase() || "air" })}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="Off Hand"
-                                />
-                            )}
-                        />
-                        <Autocomplete
-                            sx={styles.formInput}
-                            options={minecraftItems.filter((i) => i?.enchantCategories?.includes("armor_head") || i.name === "air")}
-                            getOptionLabel={(option) => option.name}
-                            defaultValue={minecraftItems.find((i) => i.name === "air") || minecraftItems[0]}
-                            onChange={(e, v) => setEquipment({ ...equipment, head: v?.displayName.toLocaleLowerCase() || "air" })}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="Head"
-                                />
-                            )}
-                        />
-                        <Autocomplete
-                            sx={styles.formInput}
-                            options={minecraftItems.filter((i) => i?.enchantCategories?.includes("armor_chest") || i.name === "air")}
-                            getOptionLabel={(option) => option.name}
-                            defaultValue={minecraftItems.find((i) => i.name === "air") || minecraftItems[0]}
-                            onChange={(e, v) => setEquipment({ ...equipment, chest: v?.displayName.toLocaleLowerCase() || "air" })}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="Chest"
-                                />
-                            )}
-                        />
-                        <Autocomplete
-                            sx={styles.formInput}
-                            options={minecraftItems.filter((i) => (i?.enchantCategories?.includes("armor") && i?.name?.includes("leggings")) || i.name === "air")}
-                            getOptionLabel={(option) => option.name}
-                            defaultValue={minecraftItems.find((i) => i.name === "air") || minecraftItems[0]}
-                            onChange={(e, v) => setEquipment({ ...equipment, legs: v?.displayName.toLocaleLowerCase() || "air" })}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="Legs"
-                                />
-                            )}
-                        />
-                        <Autocomplete
-                            sx={styles.formInput}
-                            options={minecraftItems.filter((i) => i?.enchantCategories?.includes("armor_feet") || i.name === "air")}
-                            getOptionLabel={(option) => option.name}
-                            defaultValue={minecraftItems.find((i) => i.name === "air") || minecraftItems[0]}
-                            onChange={(e, v) => setEquipment({ ...equipment, feet: v?.displayName.toLocaleLowerCase() || "air" })}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="Feet"
-                                />
-                            )}
-                        />
-                    </Stack>
-                    <TextField
-                        sx={styles.formInput}
-                        label="Experience"
-                        type="number"
-                        value={drop.experience}
-                        InputProps={{
-                            inputProps: { min: 0 },
-                            startAdornment: (
-                                <InputAdornment position="start">Exp:</InputAdornment>
-                            )
-                        }}
-                        onChange={(e: any) => {
-                            if (e.target.value === "") {
-                                setDrop({
-                                    ...drop,
-                                    experience: 0
-                                });
-                            } else {
-                                setDrop({
-                                    ...drop,
-                                    experience: parseInt(e.target.value)
-                                });
-                            }
-                        }}
+                    <Autocomplete
+                        disableClearable
+                        sx={styles.button}
+                        options={minecraftItems.filter((i) => (i?.enchantCategories?.includes("armor") && i?.name?.includes("leggings")) || i.name === "air")}
+                        getOptionLabel={(option) => option.displayName}
+                        value={minecraftItems.find((i: any) => i.displayName.toLocaleLowerCase() === equipment.legs)}
+                        onChange={(e, v) => setEquipment({ ...equipment, legs: v?.displayName.toLocaleLowerCase() || "air" })}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                label="Legs"
+                            />
+                        )}
                     />
-                    <Stack spacing="8px">
-                        {
-                            drop.items && drop.items.length > 0 && drop.items.map((item, index) => (
-                                <Box key={item.itemId} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%', marginY: '8px' }}>
-                                    <Autocomplete
-                                        sx={{ marginX: '4px', width: '80%' }}
-                                        autoSelect={true}
-                                        disableClearable={true}
-                                        options={allItems}
-                                        getOptionLabel={(option) => option.name}
-                                        value={allItems.find((i) => i.id === item.itemId)}
-                                        onChange={(e, v) => {
-                                            if (drop.items) {
-                                                const newItems = [...drop.items];
-                                                newItems[index] = {
-                                                    itemId: v.id,
-                                                    itemAmount: item.itemAmount || 1,
-                                                    maxItemAmount: item.maxItemAmount || 1,
-                                                    chance: item.chance || 1
-                                                };
-                                                setDrop({
-                                                    ...drop,
-                                                    items: newItems
-                                                });
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                variant="outlined"
-                                                label="Drop Item"
-                                            />
-                                        )}
-                                    />
-                                    <TextField
-                                        sx={{ marginX: '4px' }}
-                                        label="Min"
-                                        type="number"
-                                        value={item.itemAmount || 1}
-                                        InputProps={{
-                                            inputProps: {
-                                                min: 1,
-                                                max: minecraftItems.find(mi => mi.displayName.toLocaleLowerCase() === allItems.find(i => i.id === item.itemId)?.name)?.stackSize || 1
-                                            },
-                                        }}
-                                        onChange={(e: any) => {
-                                            if (e.target.value === "") {
-                                                if (!drop?.items) return;
-                                                setDrop({
-                                                    ...drop,
-                                                    items: [...drop.items].map((i, idx) => {
-                                                        if (idx === index) {
-                                                            return {
-                                                                ...i,
-                                                                itemAmount: 1
-                                                            }
-                                                        }
-                                                        return i;
-                                                    })
-                                                })
-                                            } else {
-                                                if (!drop?.items) return;
-                                                setDrop({
-                                                    ...drop,
-                                                    items: [...drop.items].map((i, idx) => {
-                                                        if (idx === index) {
-                                                            const a = {
-                                                                ...i,
-                                                                itemAmount: parseInt(e.target.value)
-                                                            };
-                                                            if (item.maxItemAmount) {
-                                                                if (item?.maxItemAmount < a.itemAmount) {
-                                                                    a.maxItemAmount = item.itemAmount;
-                                                                }
-                                                            } else {
-                                                                a.maxItemAmount = a.itemAmount;
-                                                            }
-                                                            return a;
-                                                        }
-                                                        return i;
-                                                    })
-                                                })
-                                            }
-                                        }}
-                                    />
-                                    <TextField
-                                        sx={{ marginX: '4px' }}
-                                        label="Max"
-                                        type="number"
-                                        value={item.maxItemAmount || 1}
-                                        InputProps={{
-                                            inputProps: {
-                                                min: item.itemAmount || 1,
-                                                max: minecraftItems.find(mi => mi.displayName.toLocaleLowerCase() === allItems.find(i => i.id === item.itemId)?.name)?.stackSize || 1
-                                            },
-                                        }}
-                                        onChange={(e: any) => {
-                                            if (e.target.value === "") {
-                                                if (!drop?.items) return;
-                                                setDrop({
-                                                    ...drop,
-                                                    items: [...drop.items].map((i, idx) => {
-                                                        if (idx === index) {
-                                                            return {
-                                                                ...i,
-                                                                maxItemAmount: item.itemAmount || 1
-                                                            }
-                                                        }
-                                                        return i;
-                                                    })
-                                                })
-                                            } else {
-                                                if (!drop?.items) return;
-                                                setDrop({
-                                                    ...drop,
-                                                    items: [...drop.items].map((i, idx) => {
-                                                        if (idx === index) {
-                                                            return {
-                                                                ...i,
-                                                                maxItemAmount: parseInt(e.target.value)
-                                                            }
-                                                        }
-                                                        return i;
-                                                    })
-                                                })
-                                            }
-                                        }}
-                                    />
-                                    <TextField
-                                        sx={{ marginX: '4px' }}
-                                        label="Chance"
-                                        type="number"
-                                        value={item.chance || 1}
-                                        InputProps={{
-                                            inputProps: {
-                                                min: 0.001,
-                                                max: 100
-                                            }
-                                        }}
-                                        onChange={(e: any) => {
-                                            if (e.target.value === "") {
-                                                if (!drop?.items) return;
-                                                setDrop({
-                                                    ...drop,
-                                                    items: [...drop.items].map((i, idx) => {
-                                                        if (idx === index) {
-                                                            return {
-                                                                ...i,
-                                                                chance: 0.001
-                                                            }
-                                                        }
-                                                        return i;
-                                                    })
-                                                })
-                                            } else {
-                                                if (!drop?.items) return;
-                                                setDrop({
-                                                    ...drop,
-                                                    items: [...drop.items].map((i, idx) => {
-                                                        if (idx === index) {
-                                                            return {
-                                                                ...i,
-                                                                chance: parseFloat(e.target.value)
-                                                            }
-                                                        }
-                                                        return i;
-                                                    })
-                                                })
-                                            }
-                                        }}
-                                    />
-                                    <IconButton
-                                        sx={{ marginX: '4px' }}
-                                        onClick={() => {
+                    <Autocomplete
+                        disableClearable
+                        sx={styles.button}
+                        options={minecraftItems.filter((i) => i?.enchantCategories?.includes("armor_feet") || i.name === "air")}
+                        getOptionLabel={(option) => option.displayName}
+                        value={minecraftItems.find((i: any) => i.displayName.toLocaleLowerCase() === equipment.feet)}
+                        onChange={(e, v) => setEquipment({ ...equipment, feet: v?.displayName.toLocaleLowerCase() || "air" })}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                label="Feet"
+                            />
+                        )}
+                    />
+                </Box>
+                <TextField
+                    sx={styles.input}
+                    label="Experience"
+                    type="number"
+                    value={drop.experience}
+                    InputProps={{
+                        inputProps: { min: 0 },
+                        startAdornment: (
+                            <InputAdornment position="start">Exp:</InputAdornment>
+                        )
+                    }}
+                    onChange={(e: any) => {
+                        if (e.target.value === "") {
+                            setDrop({
+                                ...drop,
+                                experience: 0
+                            });
+                        } else {
+                            setDrop({
+                                ...drop,
+                                experience: parseInt(e.target.value)
+                            });
+                        }
+                    }}
+                />
+                <Stack spacing="8px">
+                    {
+                        drop.items && allItems.length > 0 && drop.items.length > 0 && drop.items.map((item, index) => {
+
+                            return (<Box key={`${item.itemId}_${index}`} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%', marginY: '8px' }}>
+                                <Autocomplete
+                                    sx={{ marginX: '4px', width: '70%' }}
+                                    disableClearable={true}
+                                    options={allItems}
+                                    value={allItems.find((i: Item) => i.id === item.itemId)}
+                                    getOptionLabel={(option) => option.name}
+                                    onChange={(e, v) => {
+                                        if (drop.items) {
+                                            const newItems = [...drop.items];
+                                            newItems[index] = {
+                                                itemId: v.id,
+                                                itemAmount: item.itemAmount || 1,
+                                                maxItemAmount: item.maxItemAmount || 1,
+                                                chance: item.chance || 1
+                                            };
+                                            setDrop({
+                                                ...drop,
+                                                items: newItems
+                                            });
+                                        }
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            variant="outlined"
+                                            label="Drop Item"
+                                        />
+                                    )}
+                                />
+                                <TextField
+                                    sx={{ marginX: '4px' }}
+                                    label="Min"
+                                    type="number"
+                                    value={item.itemAmount || 1}
+                                    InputProps={{
+                                        inputProps: {
+                                            min: 1,
+                                            max: 64//minecraftItems.find(mi => mi.displayName.toLocaleLowerCase() === allItems.find(i => i.id === item.itemId)?.name)?.stackSize || 1
+                                        },
+                                    }}
+                                    onChange={(e: any) => {
+                                        if (e.target.value === "") {
                                             if (!drop?.items) return;
                                             setDrop({
                                                 ...drop,
-                                                items: [...drop.items].filter((i, idx) => idx !== index)
-                                            });
-                                        }}
-                                    ><Close /></IconButton>
-                                </Box>
-                            ))
-                        }
-                        <Button
-                            sx={{ width: '100%' }}
-                            onClick={() => {
-                                if (!drop?.items) {
-                                    setDrop({
-                                        ...drop,
-                                        items: [{
-                                            itemId: 0,
-                                            itemAmount: 1,
-                                            maxItemAmount: 1,
-                                            chance: 1
-                                        }]
-                                    });
-                                } else {
-                                    setDrop({
-                                        ...drop,
-                                        items: [...drop.items, {
-                                            itemId: 0,
-                                            itemAmount: 1,
-                                            maxItemAmount: 1,
-                                            chance: 1
-                                        }]
-                                    });
-                                }
-                            }}
-                        >ADD ITEM DROP</Button>
-                    </Stack>
-                    <Box sx={styles.buttons}>
-                        <Button
-                            variant="contained"
-                            color="success"
-                            sx={styles.button}
-                            onClick={handleSubmit}
-                        >
-                            Confirm
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="error"
-                            sx={styles.button}
-                            onClick={closeModal}
-                        >
-                            Cancel
-                        </Button>
-                    </Box>
-                </form>
-            </Box>
+                                                items: [...drop.items].map((i, idx) => {
+                                                    if (idx === index) {
+                                                        return {
+                                                            ...i,
+                                                            itemAmount: 1
+                                                        }
+                                                    }
+                                                    return i;
+                                                })
+                                            })
+                                        } else {
+                                            if (!drop?.items) return;
+                                            setDrop({
+                                                ...drop,
+                                                items: [...drop.items].map((i, idx) => {
+                                                    if (idx === index) {
+                                                        const a = {
+                                                            ...i,
+                                                            itemAmount: parseInt(e.target.value)
+                                                        };
+                                                        if (item.maxItemAmount) {
+                                                            if (item?.maxItemAmount < a.itemAmount) {
+                                                                a.maxItemAmount = item.itemAmount;
+                                                            }
+                                                        } else {
+                                                            a.maxItemAmount = a.itemAmount;
+                                                        }
+                                                        return a;
+                                                    }
+                                                    return i;
+                                                })
+                                            })
+                                        }
+                                    }}
+                                />
+                                <TextField
+                                    sx={{ marginX: '4px' }}
+                                    label="Max"
+                                    type="number"
+                                    value={item.maxItemAmount || 1}
+                                    InputProps={{
+                                        inputProps: {
+                                            min: item.itemAmount || 1,
+                                            max: 64//minecraftItems.find(mi => mi.displayName.toLocaleLowerCase() === allItems.find(i => i.id === item.itemId)?.name)?.stackSize || 1
+                                        },
+                                    }}
+                                    onChange={(e: any) => {
+                                        if (e.target.value === "") {
+                                            if (!drop?.items) return;
+                                            setDrop({
+                                                ...drop,
+                                                items: [...drop.items].map((i, idx) => {
+                                                    if (idx === index) {
+                                                        return {
+                                                            ...i,
+                                                            maxItemAmount: item.itemAmount || 1
+                                                        }
+                                                    }
+                                                    return i;
+                                                })
+                                            })
+                                        } else {
+                                            if (!drop?.items) return;
+                                            setDrop({
+                                                ...drop,
+                                                items: [...drop.items].map((i, idx) => {
+                                                    if (idx === index) {
+                                                        return {
+                                                            ...i,
+                                                            maxItemAmount: parseInt(e.target.value)
+                                                        }
+                                                    }
+                                                    return i;
+                                                })
+                                            })
+                                        }
+                                    }}
+                                />
+                                <TextField
+                                    sx={{ marginX: '4px' }}
+                                    label="Chance"
+                                    type="number"
+                                    value={item.chance || 1}
+                                    InputProps={{
+                                        inputProps: {
+                                            min: 0.001,
+                                            max: 100
+                                        }
+                                    }}
+                                    onChange={(e: any) => {
+                                        if (e.target.value === "") {
+                                            if (!drop?.items) return;
+                                            setDrop({
+                                                ...drop,
+                                                items: [...drop.items].map((i, idx) => {
+                                                    if (idx === index) {
+                                                        return {
+                                                            ...i,
+                                                            chance: 0.001
+                                                        }
+                                                    }
+                                                    return i;
+                                                })
+                                            })
+                                        } else {
+                                            if (!drop?.items) return;
+                                            setDrop({
+                                                ...drop,
+                                                items: [...drop.items].map((i, idx) => {
+                                                    if (idx === index) {
+                                                        return {
+                                                            ...i,
+                                                            chance: parseFloat(e.target.value)
+                                                        }
+                                                    }
+                                                    return i;
+                                                })
+                                            })
+                                        }
+                                    }}
+                                />
+                                <IconButton
+                                    sx={{ marginX: '4px' }}
+                                    onClick={() => {
+                                        if (!drop?.items) return;
+                                        setDrop({
+                                            ...drop,
+                                            items: [...drop.items].filter((i, idx) => idx !== index)
+                                        });
+                                    }}
+                                ><Close /></IconButton>
+                            </Box>
+                            )})
+                    }
+                    <Button
+                        sx={{ width: '100%' }}
+                        onClick={() => {
+                            if (!drop?.items) {
+                                setDrop({
+                                    ...drop,
+                                    items: [{
+                                        itemId: 0,
+                                        itemAmount: 1,
+                                        maxItemAmount: 1,
+                                        chance: 1
+                                    }]
+                                });
+                            } else {
+                                setDrop({
+                                    ...drop,
+                                    items: [...drop.items, {
+                                        itemId: 0,
+                                        itemAmount: 1,
+                                        maxItemAmount: 1,
+                                        chance: 1
+                                    }]
+                                });
+                            }
+                        }}
+                    >ADD ITEM DROP</Button>
+                </Stack>
+                <Box sx={styles.buttons}>
+                    <Button
+                        variant="contained"
+                        color="success"
+                        sx={styles.button}
+                        onClick={handleSubmit}
+                    >
+                        Confirm
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        sx={styles.button}
+                        onClick={closeModal}
+                    >
+                        Cancel
+                    </Button>
+                </Box>
+            </form>
         </Box >
     )
 };

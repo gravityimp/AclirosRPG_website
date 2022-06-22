@@ -3,7 +3,7 @@ const ItemService = require("../services/itemService");
 class ItemController {
     async getAllItems(req, res, next) {
         try {
-            const items = await ItemService.getAllItems();
+            const items = await ItemService.getAllItems(req.query);
             return res.json(items);
         } catch (e) {
             next(e);

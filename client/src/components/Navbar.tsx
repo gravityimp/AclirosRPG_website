@@ -112,7 +112,7 @@ const Navbar: FC<Props> = (props) => {
                                     color: location.pathname === '/items' ? '	#FFAA00' : 'black',
                                     cursor: location.pathname === '/items' ? 'default' : 'pointer'
                                 }}
-                                onClick={() => location.pathname === '/items' && navigate('/items')}
+                                onClick={() => location.pathname !== '/items' && navigate('/items')}
                             >
                                 <Typography textAlign="center">Items</Typography>
                             </MenuItem>
@@ -121,7 +121,7 @@ const Navbar: FC<Props> = (props) => {
                                     color: location.pathname === '/mobs' ? '#FFAA00' : 'black',
                                     cursor: location.pathname === '/mobs' ? 'default' : 'pointer'
                                 }}
-                                onClick={() => location.pathname === '/mobs' && navigate('/mobs')}
+                                onClick={() => location.pathname !== '/mobs' && navigate('/mobs')}
                             >
                                 <Typography textAlign="center">Mobs</Typography>
                             </MenuItem>
@@ -130,7 +130,7 @@ const Navbar: FC<Props> = (props) => {
                                     color: location.pathname === '/quests' ? '#FFAA00' : 'black',
                                     cursor: location.pathname === '/quests' ? 'default' : 'pointer'
                                 }}
-                                onClick={() => location.pathname === '/quests' && navigate('/quests')}
+                                onClick={() => location.pathname !== '/quests' && navigate('/quests')}
                             >
                                 <Typography textAlign="center">Quests</Typography>
                             </MenuItem>
@@ -139,7 +139,7 @@ const Navbar: FC<Props> = (props) => {
                                     color: location.pathname === '/npc' ? '#FFAA00' : 'black',
                                     cursor: location.pathname === '/npc' ? 'default' : 'pointer'
                                 }}
-                                onClick={() => location.pathname === '/npc' && navigate('/npc')}
+                                onClick={() => location.pathname !== '/npc' && navigate('/npc')}
                             >
                                 <Typography textAlign="center">Npc</Typography>
                             </MenuItem>

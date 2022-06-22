@@ -132,6 +132,14 @@ const PreviewItem: FC<PreviewItemInterface> = ({ item }) => {
         )}
       </Box>
 
+      {item.lore.length > 0 && (
+        <Box sx={styles.section}>
+          <Typography sx={{ color: "#FFFFFF" }}>
+            {item.lore}
+          </Typography>
+        </Box>
+      )}
+
       {item.playerBound && (
         <Box sx={styles.section}>
           <Typography sx={{ color: "#AA0000", fontWeight: "bold" }}>

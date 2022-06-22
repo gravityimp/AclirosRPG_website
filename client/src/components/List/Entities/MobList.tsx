@@ -1,9 +1,9 @@
 import { ExpandMore } from "@mui/icons-material";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Paper, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, Paper, Typography } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "../../../api/database";
-import { Mob, MobFilter } from "../../../services/Mob";
+import { Mob, MobFilter, getMobTypeColor } from "../../../services/Mob";
 import MobFilterComponent from "../../Filter/MobFilterComponent";
 
 const styles = {
@@ -22,20 +22,33 @@ const MobList = () => {
     const [lastPage, setLastPage] = useState<number>(0);
     const [filter, setFilter] = useState<MobFilter>({});
 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const lastElement = useRef<any>();
     const observer = useRef<any>();
 
     const fetchMob = async () => {
-        apiClient.get("api/mobs", {
-            params: {
-                page: page,
-                limit: 20,
-                ...filter
-            }
-        }).then(res => {
-            setMobList(res.data.data);
-            setLastPage(res.data.lastPage);
-        });
+        setIsLoading(true);
+        let response: any;
+        try {
+            response = await apiClient.get("api/mobs", {
+                params: {
+                    page: page,
+                    limit: 20,
+                    ...filter
+                }
+            });
+        } catch (error) {
+
+        }
+        if (page === 0) {
+            setMobList(response.data.data);
+            setLastPage(response.data.lastPage);
+        } else {
+            setMobList([...mobList, ...response.data.data]);
+        }
+
+        setIsLoading(false);
     };
 
     useEffect(() => {
@@ -43,36 +56,45 @@ const MobList = () => {
     }, [page, filter]);
 
     useEffect(() => {
+        if (isLoading) return;
+        if (observer.current) observer.current.disconnect();
         const options = {
             root: document,
         }
-        const callback = function(entries: any, observer: any) {
-            if(entries[0].isIntersecting) {
-                if(page < lastPage) {
+        const callback = function (entries: any, observer: any) {
+            if (entries[0].isIntersecting) {
+                if (page < lastPage) {
                     setPage(page + 1);
                 }
             }
         };
         observer.current = new IntersectionObserver(callback, options);
         observer.current.observe(lastElement.current);
-    }, []);
+    }, [isLoading]);
 
     return (
         <Paper elevation={6} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'start', alignItems: 'center', width: '90%', padding: '16px', margin: '16px', height: 'fit-content', minHeight: '70vh' }}>
-            <MobFilterComponent filter={filter} setFilter={setFilter}/>
-            {mobList.map((mob) => {
+            <MobFilterComponent filter={filter} setFilter={setFilter} />
+            {mobList.length > 0 && mobList.map((mob, idx) => {
                 return (
-                    <Accordion key={mob.id} sx={styles.accordion}>
+                    <Accordion key={`${mob.id}_${idx}`} sx={styles.accordion}>
                         <AccordionSummary
                             expandIcon={<ExpandMore />}
                         >
-                            <Typography>{mob.name}</Typography>
-                            <Button 
-                                variant="contained" 
-                                sx={{ marginLeft: 'auto', marginRight: '16px' }}
-                                 color="primary"
-                                 onClick={() => navigate('/mobs/'+mob.id)}
-                            >SHOW</Button>
+                            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <Typography
+                                    sx={{
+                                        marginLeft: '8px',
+                                        color: getMobTypeColor(mob.type),
+                                        fontWeight: mob.type === "boss" || mob.type === "special" ? 'bold' : 'normal'
+                                    }}>[LVL: {mob.level}] {mob.name}</Typography>
+                            </Box>
+                            <Button
+                                    variant="contained"
+                                    sx={{ marginLeft: 'auto', marginRight: '16px' }}
+                                    color="primary"
+                                    onClick={() => navigate('/mobs/' + mob.id)}
+                                >SHOW</Button>
                         </AccordionSummary>
                         <AccordionDetails>
                             Some mob
@@ -82,9 +104,9 @@ const MobList = () => {
             })}
             {
                 mobList.length === 0 &&
-                 (
-                    <Typography variant="h3" sx={{ justifySelf: 'center', marginY: 'auto', fontWeight: "bold" }}>No MOBS found</Typography>
-                 )
+                (
+                    <Typography variant="h3" sx={{ justifySelf: 'center', marginY: 'auto', fontWeight: "bold" }}>No Mobs found</Typography>
+                )
             }
             <div ref={lastElement} style={{ height: '10px', width: '100%', backgroundColor: 'transparent' }} />
         </Paper>

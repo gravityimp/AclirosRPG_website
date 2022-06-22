@@ -55,6 +55,21 @@ const RequirementsComponent: FC<RequirementsComponentProps> = (props) => {
   };
 
   useEffect(() => {
+    if(requirementsDetails.level) {
+      setLevel(requirementsDetails.level);
+    }
+    if(requirementsDetails.strength) {
+      setStr(requirementsDetails.strength);
+    }
+    if(requirementsDetails.agillity) {
+      setAgl(requirementsDetails.agillity);
+    }
+    if(requirementsDetails.intelligence) {
+      setInt(requirementsDetails.intelligence);
+    }
+  }, []);
+
+  useEffect(() => {
     buildRequirements();
   }, [level, str, agl, int]);
 

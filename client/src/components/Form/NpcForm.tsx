@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import { FC, useState } from "react";
 import { apiClient } from "../../api/database";
 import { Npc } from "../../services/Npc";
-import { styles } from "./styles";
+import { styles } from "./newstyles";
 
 interface Props {
     closeModal: () => void;
@@ -20,7 +20,7 @@ const NpcForm: FC<Props> = (props) => {
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
-        if(name === "") {
+        if (name === "") {
             enqueueSnackbar("Name is required", { variant: "error" });
             return;
         }
@@ -36,12 +36,28 @@ const NpcForm: FC<Props> = (props) => {
     };
 
     return (
-        <Box sx={styles.box}>
-            <form style={{ overflowY: "auto", width: "100%" }}>
+        <Box
+            sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                overflowY: "auto"
+            }}
+        >
+            <form
+                style={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "start",
+                    alignItems: "center"
+                }}
+            >
                 <TextField
                     label="Name"
                     placeholder="Bob"
-                    sx={styles.formInput}
+                    sx={styles.input}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     InputProps={{
@@ -52,7 +68,7 @@ const NpcForm: FC<Props> = (props) => {
                 />
                 <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                     <TextField
-                        sx={{ width: '30%' }}
+                        sx={{ width: '30%', marginX: '8px' }}
                         label="X"
                         type="number"
                         value={location.x}
@@ -65,7 +81,7 @@ const NpcForm: FC<Props> = (props) => {
                         }}
                     />
                     <TextField
-                        sx={{ width: '30%' }}
+                        sx={{ width: '30%', marginX: '8px' }}
                         label="Y"
                         type="number"
                         value={location.y}
@@ -78,7 +94,7 @@ const NpcForm: FC<Props> = (props) => {
                         }}
                     />
                     <TextField
-                        sx={{ width: '30%' }}
+                        sx={{ width: '30%', marginX: '8px' }}
                         label="Z"
                         type="number"
                         value={location.z}

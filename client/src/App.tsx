@@ -27,14 +27,16 @@ export default function App() {
   const [user, setUser] = useState<any>(JSON.parse(localStorage.getItem("user") || "{}"));
 
   useEffect(() => {
+    let _roles: string[] = []
     if (user && localStorage.getItem("user")) {
       apiClient.get(`api/players/${user.uuid}/roles`).then(res => {
         res.data.forEach((role: any) => {
-          setRoles(roles => [...roles, role.role]);
+          _roles.push(role.role)
         });
+        setRoles(_roles);
       });
     }
-  }, []);
+  }, [user]);
 
   return (
     <Box sx={{
@@ -84,42 +86,15 @@ export default function App() {
         handleClose={() => setModal(null)}
         setToken={setToken}
         setUser={setUser}
+        title="Sign in"
       />
       <ModalRegister
         isOpen={modal === "register"}
         handleClose={() => setModal(null)}
         setToken={setToken}
         setUser={setUser}
+        title="Sign up"
       />
     </Box>
   );
-
-  // return (
-  //   <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-  //     <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
-  //       <Button onClick={() => setModal("login")}>Open Login</Button>
-  //       <Button onClick={() => setModal("register")}>Open Register</Button>
-  //       <Button onClick={() => setModal("item")}>Open Item Editor</Button>
-  //       <Button onClick={() => setModal("npc")}>Open NPC Editor</Button>
-  //       <Button onClick={() => setModal("quest")}>Open QUEST Editor</Button>
-  //       <Button onClick={() => setModal("mob")}>Open MOB Editor</Button>
-  //     </Box>
-  //     {/* <NpcPage npcId={0}/> */}
-  //     <MobPage mobId={0}/>
-  //     {/* <MobList />
-  //     <br /><br />
-  //     <QuestList />
-  //     <br /><br />
-  //     <NpcList /> */}
-  //     <EditModal isOpen={modal === "npc"} onClose={() => setModal(null)}>
-  //       <NpcForm closeModal={() => setModal(null)} />
-  //     </EditModal>
-  //     <EditModal isOpen={modal === "quest"} onClose={() => setModal(null)}>
-  //       <QuestForm closeModal={() => setModal(null)} />
-  //     </EditModal>
-  //     <EditModal isOpen={modal === "mob"} onClose={() => setModal(null)}>
-  //       <MobForm closeModal={() => setModal(null)} />
-  //     </EditModal>
-  //   </Box>
-  // );
 }

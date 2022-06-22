@@ -1,5 +1,5 @@
 import { Add, ExpandMore } from "@mui/icons-material";
-import { Accordion, AccordionSummary, Typography, AccordionDetails, Button, Box, Fab } from "@mui/material";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, Button, Box, Fab, Chip } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -29,23 +29,38 @@ const AdminNpcList = () => {
     const [lastPage, setLastPage] = useState<number>(0);
     const [filter, setFilter] = useState<NpcFilter>({});
 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const lastElement = useRef<any>();
     const observer = useRef<any>();
 
     const fetchNpc = async () => {
-        apiClient.get("api/npc", {
-            params: {
-                page: page,
-                limit: 20,
-                ...filter
-            }
-        }).then(res => {
-            setNpcList(res.data.data);
-            setLastPage(res.data.lastPage);
-        });
-    };
+        setIsLoading(true);
+        let response: any;
+        try {
+            response = await apiClient.get("api/npc", {
+                params: {
+                    page: page,
+                    limit: 20,
+                    ...filter
+                }
+            });
+        } catch (error) {
+
+        }
+        if (page === 0) {
+            setNpcList(response.data.data);
+            setLastPage(response.data.lastPage);
+        } else {
+            setNpcList([...npcList, ...response.data.data]);
+        }
+
+        setIsLoading(false);
+    }
 
     useEffect(() => {
+        if (isLoading) return;
+        if (observer.current) observer.current.disconnect();
         const options = {
             root: document,
         }
@@ -58,15 +73,20 @@ const AdminNpcList = () => {
         };
         observer.current = new IntersectionObserver(callback, options);
         observer.current.observe(lastElement.current);
-    }, []);
+    }, [isLoading]);
+
+    useEffect(() => {
+        setPage(0);
+        fetchNpc();
+    }, [filter]);
 
     useEffect(() => {
         fetchNpc();
-    }, [filter, page]);
+    }, [page]);
 
     const deleteNpc = async (id: number) => {
         apiClient.delete(`api/npc/${id}`).then(res => {
-            fetchNpc();
+            setPage(0);
             enqueueSnackbar(`NPC DELETED [${id}]`, { variant: "success" });
         }).catch(err => {
             enqueueSnackbar("Something went wrong", {variant: 'error'});
@@ -81,7 +101,7 @@ const AdminNpcList = () => {
     const handleClose = () => {
         setIsEditMode(false);
         setNpcEdit(null);
-        fetchNpc();
+        setPage(0);
     }
 
     return (
@@ -89,13 +109,26 @@ const AdminNpcList = () => {
             <Box sx={{ width: '100%' }}>
                 <NpcFilterComponent filter={filter} setFilter={setFilter} />
             </Box>
+            {
+                npcList.length === 0 && (
+                    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '16px' }}>
+                            <Typography variant="h4">No Npc Found</Typography>
+                        </Box>
+                )
+            }
             {npcList.map((npc) => {
                 return (
                     <Accordion key={npc.id} sx={styles.accordion}>
                         <AccordionSummary
                             expandIcon={<ExpandMore />}
                         >
-                            <Typography>ID: {npc.id} NAME: {npc.name}</Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <Chip label={`ID: ${npc.id}`} />
+                                <Typography
+                                    sx={{
+                                        marginLeft: '8px',
+                                    }}>{npc.name}</Typography>
+                            </Box>
                         </AccordionSummary>
                         <AccordionDetails>
                             <Button color="success" onClick={() => navigate(`/npc/${npc.id}`)}>SHOW</Button>
@@ -106,11 +139,11 @@ const AdminNpcList = () => {
                 )
             })}
             <div ref={lastElement} style={{ height: '10px', width: '100%', backgroundColor: 'transparent' }} />
-            <EditModal isOpen={isEditMode} onClose={handleClose}>
+            <EditModal isOpen={isEditMode} onClose={handleClose} title={npcEdit !== null ? `Edit Npc [${npcEdit.id}]` : 'Create Npc'}>
                 <NpcForm editNpc={npcEdit !== null ? npcEdit : undefined} closeModal={handleClose} />
             </EditModal>
             <Fab
-                sx={{ position: 'absolute', bottom: '16px', right: '16px' }}
+                sx={{ position: 'fixed', bottom: '16px', right: '16px' }}
                 color="primary"
                 onClick={() => setIsEditMode(true)}
             >

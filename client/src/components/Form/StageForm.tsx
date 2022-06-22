@@ -4,7 +4,7 @@ import { FC, useState } from "react";
 import { Item } from "../../services/Item";
 import { Npc } from "../../services/Npc";
 import { Quest, QuestStage } from "../../services/Quest";
-import { styles } from "./styles";
+import { styles } from "./newstyles";
 import { minecraftItems } from "../../static/minecraftItems";
 import { useSnackbar } from "notistack";
 
@@ -52,14 +52,14 @@ const StageForm: FC<Props> = (props) => {
             stageType,
             stageDialog,
         }
-        if(stageRewards.length > 0) {
+        if (stageRewards.length > 0) {
             _stage.stageRewards = stageRewards;
         }
         return _stage;
     };
 
     const handleSubmit = () => {
-        if(stageName === "") {
+        if (stageName === "") {
             enqueueSnackbar("Stage name cannot be empty", { variant: "error" });
             return;
         }
@@ -76,15 +76,22 @@ const StageForm: FC<Props> = (props) => {
     };
 
     return (
-        <Box sx={styles.box}>
-            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%', marginBottom: '16px' }}>
-                <Typography variant="h3">Stage Editor</Typography>
-                <IconButton
-                    sx={{ marginRight: '5%', marginLeft: 'auto' }}
-                    onClick={closeModal}
-                ><Close /></IconButton>
-            </Box>
-            <Box sx={{ overflowY: 'auto', width: '90%', display: 'flex', flexDirection: 'column', marginTop: '16px', alignItems: 'center' }}>
+        <Box
+            sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                overflowY: "auto"
+            }}
+        >
+            <Box sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "start",
+                alignItems: "center"
+            }}>
                 <TextField
                     disabled={editStage ? true : false}
                     sx={{ marginY: '4px', width: '80%' }}
@@ -125,13 +132,14 @@ const StageForm: FC<Props> = (props) => {
                     <MenuItem value="find">Find</MenuItem>
                 </Select>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '80%' }}>
-                    <Divider sx={{ width: '120%', marginTop: '16px' }}/>
+                    <Divider sx={{ width: '120%', marginTop: '16px' }} />
                     <Typography sx={{ marginBottom: '16px', marginTop: '8px' }} variant="h3">Dialog</Typography>
                     {
-                        stageDialog.map((dialog, index) => {
+                        stageDialog.map((dialog: any, index: number) => {
                             if (stageDialog.length > 1) {
                                 return (
                                     <Chip
+                                        key={`${dialog}_${index}`}
                                         sx={{ width: '100%', marginY: '4px' }}
                                         label={`${index}: ${dialog}`}
                                         onDelete={() => setStageDialog(stageDialog.filter((_dialog, _index) => _index !== index))}
@@ -164,12 +172,12 @@ const StageForm: FC<Props> = (props) => {
                     />
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '80%' }}>
-                    <Divider sx={{ width: '120%', marginTop: '16px' }}/>
+                    <Divider sx={{ width: '120%', marginTop: '16px' }} />
                     <Typography sx={{ marginBottom: '16px', marginTop: '8px' }} variant="h3">Stage Rewards</Typography>
                     {
-                        stageRewards && stageRewards.length > 0 && stageRewards?.map((reward, idx) => {
+                        stageRewards && stageRewards.length > 0 && stageRewards?.map((reward: any, idx: number) => {
                             return (
-                                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%', marginY: '4px' }}>
+                                <Box key={`${reward.itemId}_${reward.itemAmount}_${idx}`} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%', marginY: '8px' }}>
                                     <Autocomplete
                                         sx={{ marginX: '4px', width: '100%' }}
                                         autoSelect={true}
@@ -217,7 +225,7 @@ const StageForm: FC<Props> = (props) => {
                                         InputProps={{
                                             inputProps: {
                                                 min: 1,
-                                                max: minecraftItems.find(mi => mi.displayName.toLocaleLowerCase() === addReward.name.toLocaleLowerCase())?.stackSize || 1
+                                                max: 64//minecraftItems.find(mi => mi.displayName.toLocaleLowerCase() === addReward.name.toLocaleLowerCase())?.stackSize || 1
                                             }
                                         }}
                                     />
@@ -256,7 +264,7 @@ const StageForm: FC<Props> = (props) => {
                             InputProps={{
                                 inputProps: {
                                     min: 1,
-                                    max: minecraftItems.find(mi => mi.displayName.toLocaleLowerCase() === addReward.name.toLocaleLowerCase())?.stackSize || 1
+                                    max: 64//minecraftItems.find(mi => mi.displayName.toLocaleLowerCase() === addReward.name.toLocaleLowerCase())?.stackSize || 1
                                 }
                             }}
                         />
@@ -266,7 +274,7 @@ const StageForm: FC<Props> = (props) => {
                         ><Add /></IconButton>
                     </Box>
                 </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%', marginTop: '16px'}}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%', marginTop: '16px' }}>
                     <Button
                         variant="contained"
                         color="success"

@@ -169,7 +169,7 @@ export const minecraftItems = [
   },
   {
     id: 35,
-    displayName: "Wool",
+    displayName: "White Wool",
     name: "wool",
     stackSize: 64
   },
@@ -1275,7 +1275,7 @@ export const minecraftItems = [
   },
   {
     id: 298,
-    displayName: "Leather Cap",
+    displayName: "Leather Helmet",
     name: "leather_helmet",
     stackSize: 1,
     maxDurability: 55,
@@ -1290,7 +1290,7 @@ export const minecraftItems = [
   },
   {
     id: 299,
-    displayName: "Leather Tunic",
+    displayName: "Leather Chestplate",
     name: "leather_chestplate",
     stackSize: 1,
     maxDurability: 80,
@@ -1305,7 +1305,7 @@ export const minecraftItems = [
   },
   {
     id: 300,
-    displayName: "Leather Pants",
+    displayName: "Leather Leggings",
     name: "leather_leggings",
     stackSize: 1,
     maxDurability: 75,
@@ -1925,7 +1925,7 @@ export const minecraftItems = [
   },
   {
     id: 365,
-    displayName: "Raw Chicken",
+    displayName: "Chicken",
     name: "chicken",
     stackSize: 64
   },

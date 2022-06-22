@@ -3,7 +3,7 @@ const NpcService = require("../services/npcService");
 class NpcController {
     async getAll(req, res, next) {
         try {
-            const npcList = await NpcService.getAll();
+            const npcList = await NpcService.getAll(req.query);
             res.json(npcList);
         } catch (err) {
             next(err);

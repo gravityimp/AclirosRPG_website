@@ -5,6 +5,7 @@ import { Item, ItemFilter } from "../../../services/Item";
 import ItemFilterComponent from "../../Filter/ItemFilterComponent";
 import PreviewItem from "../../Preview/PreviewItem";
 import Masonry from 'react-masonry-css';
+import { useNavigate } from "react-router-dom";
 
 const styles = {
     itemList: {
@@ -21,35 +22,53 @@ const styles = {
 
 const breakpoints = {
     default: 4,
-    1100: 3,
-    880: 2,
-    590: 1
+    1300: 3,
+    1000: 2,
+    650: 1
 };
 
 const ItemList = () => {
+
+    const navigate = useNavigate();
+    //functoin to 
 
     const [items, setItems] = useState<Item[]>([]);
     const [page, setPage] = useState<number>(0);
     const [lastPage, setLastPage] = useState<number>(0);
     const [filter, setFilter] = useState<ItemFilter>({});
 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const lastElement = useRef<any>();
     const observer = useRef<any>();
 
     const fetchItems = async () => {
-        apiClient.get("api/items", {
-            params: {
-                page: page,
-                limit: 20,
-                ...filter
-            }
-        }).then(res => {
-            setItems(res.data.data);
-            setLastPage(res.data.lastPage);
-        });
+        setIsLoading(true);
+        let response: any;
+        try {
+            response = await apiClient.get("api/items", {
+                params: {
+                    page: page,
+                    limit: 20,
+                    ...filter
+                }
+            });
+        } catch (error) {
+            return;
+        }
+        if (page === 0) {
+            setItems(response.data.data);
+            setLastPage(response.data.lastPage);
+        } else {
+            setItems([...items, ...response.data.data]);
+        }
+
+        setIsLoading(false);
     };
 
     useEffect(() => {
+        if (isLoading) return;
+        if (observer.current) observer.current.disconnect();
         const options = {
             root: document,
         }
@@ -62,11 +81,16 @@ const ItemList = () => {
         };
         observer.current = new IntersectionObserver(callback, options);
         observer.current.observe(lastElement.current);
-    }, []);
+    }, [isLoading]);
+
+    useEffect(() => {
+        setPage(0);
+        fetchItems();
+    }, [filter]);
 
     useEffect(() => {
         fetchItems();
-    }, [filter, page]);
+    }, [page]);
 
     return (
         <Paper elevation={6} sx={styles.itemList}>
@@ -87,7 +111,11 @@ const ItemList = () => {
                             >
                                 {items.map((item) => {
                                     return (
-                                        <Box key={`${item.name}_${item.id}`} sx={{ minWidth: '200px', maxWidth: '300px', width: 'fit-content', marginY: '16px', marginX: 'auto' }}>
+                                        <Box 
+                                            key={`${item.name}_${item.id}`} 
+                                            sx={{ minWidth: '200px', maxWidth: '250px', width: 'fit-content', marginY: '16px', marginX: 'auto', cursor: 'pointer'}}
+                                            onClick={() => navigate('/items/'+item.id)}
+                                        >
                                             <PreviewItem key={item.id} item={item} />
                                         </Box>
                                     );

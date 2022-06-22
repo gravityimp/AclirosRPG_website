@@ -22,19 +22,21 @@ const AdminPage = () => {
     return (
         <Paper elevation={3} sx={{
             width: '80%',
-            height: '70vh',
+            minHeight: '70vh',
+            height: 'fit-content',
             display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'start',
+            flexDirection: 'column',
+            alignItems: 'center',
             padding: '16px',
             margin: '16px',
         }}>
             <Tabs
-                orientation="vertical"
+                scrollButtons="auto"
+                orientation="horizontal"
                 variant="scrollable"
                 value={adminTab}
                 onChange={(e: any, newValue: number) => setAdminTab(newValue)}
-                sx={{ borderRight: 1, borderColor: 'divider' }}
+                sx={{ width: '100%' }}
             >
                 <Tab label="Items" {...a11yProps(0)} />
                 <Tab label="Mobs" {...a11yProps(1)} />

@@ -42,22 +42,33 @@ const QuestList = () => {
     const [page, setPage] = useState<number>(0);
     const [lastPage, setLastPage] = useState<number>(0);
 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const lastElement = useRef<any>();
     const observer = useRef<any>();
 
-    const fetchQuests = () => {
-        apiClient.get("api/quests", {
-            params: {
-                page: page,
-                limit: 20,
-                ...filter
-            }
-        }).then(res => {
-            setQuestList(res.data.data);
-            setLastPage(res.data.lastPage);
-        }).catch(err => {
-            enqueueSnackbar("Something went wrong when loading Quests", { variant: "error" });
-        });
+    const fetchQuests = async () => {
+        setIsLoading(true);
+        let response: any;
+        try {
+            response = await apiClient.get("api/quests", {
+                params: {
+                    page: page,
+                    limit: 20,
+                    ...filter
+                }
+            });
+        } catch (error) {
+
+        }
+        if (page === 0) {
+            setQuestList(response.data.data);
+            setLastPage(response.data.lastPage);
+        } else {
+            setQuestList([...questList, ...response.data.data]);
+        }
+
+        setIsLoading(false);
     }
 
     useEffect(() => {
@@ -65,6 +76,8 @@ const QuestList = () => {
     }, [page, filter]);
 
     useEffect(() => {
+        if (isLoading) return;
+        if (observer.current) observer.current.disconnect();
         const options = {
             root: document,
         }
@@ -77,7 +90,7 @@ const QuestList = () => {
         };
         observer.current = new IntersectionObserver(callback, options);
         observer.current.observe(lastElement.current);
-    }, []);
+    }, [isLoading]);
 
     return (
         <Paper elevation={6} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'start', alignItems: 'center', width: '90%', padding: '16px', margin: '16px', height: 'fit-content', minHeight: '70vh' }}>
@@ -107,7 +120,7 @@ const QuestList = () => {
                                 </Box>
                                 <Box sx={styles.body}>
                                     {
-                                        quest.requiredQuests && <Typography variant="h6">Required Quests</Typography>
+                                        quest.requiredQuests && quest.requiredQuests.length > 0 && <Typography variant="h6">Required Quests</Typography>
                                     }
                                     <Box sx={styles.details}>
                                         {
@@ -120,6 +133,24 @@ const QuestList = () => {
                                     </Box>
                                 </Box>
                             </Box>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'start', alignItems: 'start' }}>
+                                {
+                                    quest.stages.length === 0 && (
+                                        <Typography>This quest has no stages</Typography>
+                                    )
+                                }
+                                {
+                                    quest.stages.map((stage) => {
+                                        return (
+                                            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
+                                                <Typography sx={{ margin: '8px' }}>{stage.stageName}</Typography>
+                                                <Chip sx={{ margin: '8px' }} label={`TYPE: ${stage.stageType}`}/>
+                                                <Chip sx={{ margin: '8px' }} label={`NPC: ${stage.stageNPCId}`}/>
+                                            </Box>
+                                        )
+                                    })
+                                }
+                            </Box>
                         </AccordionDetails>
                     </Accordion>
                 )
@@ -127,7 +158,7 @@ const QuestList = () => {
             {
                 questList.length === 0 &&
                  (
-                    <Typography variant="h3" sx={{ justifySelf: 'center', marginY: 'auto', fontWeight: "bold" }}>No QUESTS found</Typography>
+                    <Typography variant="h3" sx={{ justifySelf: 'center', marginY: 'auto', fontWeight: "bold" }}>No Quests found</Typography>
                  )
             }
             <div ref={lastElement} style={{ height: '10px', width: '100%', backgroundColor: 'transparent' }} />

@@ -4,51 +4,16 @@ import {
   Box,
   Button,
   Checkbox,
-  FormControl,
   InputAdornment,
+  Paper,
   TextField,
   Typography
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import React, { FC, useState } from "react";
 import { apiClient } from "../../api/database";
-
-const styles = {
-  formBox: {
-    width: "500px",
-    height: "fit-content",
-    padding: "8px",
-    backgroundColor: "#fff",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: "8px"
-  },
-  formTitle: {
-    fontSize: "34px",
-    fontWeight: "bold",
-    margin: "4px 4px 16px 4px"
-  },
-  formInput: {
-    margin: "8px",
-    width: "100%"
-  },
-  formSubmit: {
-    marginTop: "16px",
-    marginBottom: "16px",
-    width: "80%",
-    alignSelf: "center"
-  },
-  formTerms: {
-    width: "100%",
-    margin: "8px",
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "start"
-  }
-};
+import EditModal from "../Modal/EditModal";
+import { styles } from './newstyles';
 
 interface Props {
   setToken: (token: any) => void;
@@ -116,7 +81,7 @@ const RegisterForm: FC<Props> = ({ setToken, setUser, handleClose }) => {
       setToken(res.data.token);
       setUser(res.data.user);
       localStorage.setItem("token", res.data.accessToken);
-      localStorage.setItem("user", res.data.user);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       handleClose();
       enqueueSnackbar("REGISTERED", {
         variant: "success"
@@ -132,7 +97,6 @@ const RegisterForm: FC<Props> = ({ setToken, setUser, handleClose }) => {
   const generatePlayer = (e: any) => {
     e.preventDefault();
     apiClient.post("api/players/generate", { name: playerName }).then(res => {
-      console.log(res.data);
       setCode(res.data.userCode);
     }).catch(err => {
       setError(err.response.data.message);
@@ -143,17 +107,11 @@ const RegisterForm: FC<Props> = ({ setToken, setUser, handleClose }) => {
   };
 
   return (
-    <Box sx={styles.formBox}>
-      <Typography sx={styles.formTitle}>Sign Up</Typography>
+    <Box sx={styles.general}>
       {error !== null && (
         <Alert
           severity="error"
-          sx={{
-            padding: "8px 16px",
-            width: "80%",
-            textAlign: "center",
-            margin: "12px 0"
-          }}
+          sx={styles.alert}
           action={
             <Button color="inherit" size="small" onClick={() => setError(null)}>
               <Close />
@@ -163,134 +121,133 @@ const RegisterForm: FC<Props> = ({ setToken, setUser, handleClose }) => {
           {error}
         </Alert>
       )}
-      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-        <TextField
-          label="New Player Name"
-          type="text"
-          placeholder="PlayerName"
-          sx={{ marginX: '8px' }}
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-        />
-        <Button
-          variant="contained"
-          sx={{ marginX: '8px' }}
-          onClick={generatePlayer}
-        >GENERATE</Button>
-        <Typography sx={{ marginLeft: '8px' }}>{code}</Typography>
-      </Box>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          padding: "8px",
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center"
-        }}
-      >
-        <FormControl>
+      <Paper elevation={4} sx={{ ...styles.input, margin: '16px', padding: '16px' }}>
+        <Typography variant="h5" sx={{ width: '100%', textAlign: 'center' }}>Generate Player</Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
           <TextField
-            label="Email"
-            placeholder="test@test.ts"
-            sx={styles.formInput}
-            error={validateEmail() !== "Looking Good!"}
-            helperText={validateEmail()}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AccountCircle />
-                </InputAdornment>
-              )
-            }}
-            FormHelperTextProps={{
-              style: {
-                color: validateEmail() === "Looking Good!" ? "#0E5835" : "red"
-              }
-            }}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            placeholder="TesT_123"
-            sx={styles.formInput}
-            error={validatePassword() !== "Looking Good!"}
-            helperText={validatePassword()}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Lock />
-                </InputAdornment>
-              )
-            }}
-            FormHelperTextProps={{
-              style: {
-                color:
-                  validatePassword() === "Looking Good!" ? "#0E5835" : "red"
-              }
-            }}
-          />
-          <TextField
-            label="Confirm Password"
-            type="password"
-            placeholder="TesT_123"
-            sx={styles.formInput}
-            error={validatePasswordConfirm() !== "Looking Good!"}
-            helperText={validatePasswordConfirm()}
-            value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Lock />
-                </InputAdornment>
-              )
-            }}
-            FormHelperTextProps={{
-              style: {
-                color:
-                  validatePasswordConfirm() === "Looking Good!"
-                    ? "#0E5835"
-                    : "red"
-              }
-            }}
-          />
-          <Box sx={styles.formTerms}>
-            <Checkbox checked={checkedTerms} onChange={handleChange} />
-            <Typography>Accept Terms of usage</Typography>
-          </Box>
-          <TextField
-            label="Code"
+            label="New Player Name"
             type="text"
-            placeholder="AB4CK4"
-            sx={styles.formInput}
-            value={codeInput}
-            onChange={(e) => {
-              if(e.target.value.length < 7) {
-                setCodeInput(e.target.value.toLocaleUpperCase());
-              }
-            }}
+            placeholder="PlayerName"
+            sx={{ marginX: '8px' }}
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
           />
           <Button
             variant="contained"
-            color="success"
-            sx={styles.formSubmit}
-            disabled={
-              validateEmail() !== "Looking Good!" ||
-              validatePassword() !== "Looking Good!" ||
-              validatePasswordConfirm() !== "Looking Good!" ||
-              checkedTerms !== true
+            sx={styles.button}
+            onClick={generatePlayer}
+          >GENERATE</Button>
+          <Typography sx={{ marginLeft: '8px' }}>{code}</Typography>
+        </Box>
+      </Paper>
+      <form
+        style={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+        <TextField
+          label="Email"
+          placeholder="test@test.ts"
+          sx={styles.input}
+          error={validateEmail() !== "Looking Good!"}
+          helperText={validateEmail()}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <AccountCircle />
+              </InputAdornment>
+            )
+          }}
+          FormHelperTextProps={{
+            style: {
+              color: validateEmail() === "Looking Good!" ? "#0E5835" : "red"
             }
-            onClick={handleSubmit}
-          >
-            Sign Up
-          </Button>
-        </FormControl>
+          }}
+        />
+        <TextField
+          label="Password"
+          type="password"
+          placeholder="TesT_123"
+          sx={styles.input}
+          error={validatePassword() !== "Looking Good!"}
+          helperText={validatePassword()}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Lock />
+              </InputAdornment>
+            )
+          }}
+          FormHelperTextProps={{
+            style: {
+              color:
+                validatePassword() === "Looking Good!" ? "#0E5835" : "red"
+            }
+          }}
+        />
+        <TextField
+          label="Confirm Password"
+          type="password"
+          placeholder="TesT_123"
+          sx={styles.input}
+          error={validatePasswordConfirm() !== "Looking Good!"}
+          helperText={validatePasswordConfirm()}
+          value={passwordConfirm}
+          onChange={(e) => setPasswordConfirm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Lock />
+              </InputAdornment>
+            )
+          }}
+          FormHelperTextProps={{
+            style: {
+              color:
+                validatePasswordConfirm() === "Looking Good!"
+                  ? "#0E5835"
+                  : "red"
+            }
+          }}
+        />
+        <Box sx={styles.checkboxGroup}>
+          <Checkbox checked={checkedTerms} onChange={handleChange} />
+          <Typography>Accept Terms of usage</Typography>
+        </Box>
+        <TextField
+          label="Code"
+          type="text"
+          placeholder="AB4CK4"
+          sx={styles.input}
+          value={codeInput}
+          onChange={(e) => {
+            if (e.target.value.length < 7) {
+              setCodeInput(e.target.value.toLocaleUpperCase());
+            }
+          }}
+        />
+        <Button
+          variant="contained"
+          color="success"
+          sx={styles.button}
+          disabled={
+            validateEmail() !== "Looking Good!" ||
+            validatePassword() !== "Looking Good!" ||
+            validatePasswordConfirm() !== "Looking Good!" ||
+            checkedTerms !== true
+          }
+          onClick={handleSubmit}
+        >
+          Sign Up
+        </Button>
       </form>
     </Box>
   );

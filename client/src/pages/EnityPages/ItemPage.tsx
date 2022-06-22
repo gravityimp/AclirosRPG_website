@@ -28,13 +28,22 @@ const styles = {
         gridTemplateRows: '1fr',
         justifyItems: 'start',
         alignItems: 'start',
+        '@media (max-width: 850px)': {
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
+        }
     },
     itemBox: {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        width: '100%',
+        minWidth: '200px', 
+        maxWidth: '250px',
+        width: 'fit-content',
+        marginBottom: '16px'
     },
     itemDetails: {
         display: 'flex',

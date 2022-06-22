@@ -16,7 +16,8 @@ function TabPanel(props: TabPanelProps) {
             id={`vertical-tabpanel-${index}`}
             aria-labelledby={`vertical-tab-${index}`}
             sx={{ 
-                width: '100%'
+                width: '100%',
+                marginTop: '16px'
              }}
             {...other}
         >

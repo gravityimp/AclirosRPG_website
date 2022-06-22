@@ -1,13 +1,28 @@
 const UserService = require('../services/userService');
 const { validationResult } = require('express-validator');
+const Joi = require('joi'); 
 const ApiError = require('../middleware/apiError');
+
+function validate(data) {
+    const schema = Joi.object({
+        email: Joi.string().min(6).email().required(),
+        password: Joi.string().min(6).required(),
+        userCode: Joi.string().length(6).required(),
+    })
+    return schema.validate(data)
+}
 
 class UserController {
     async register(req, res, next) {
         try {
             const errors = validationResult(req);
-            if(!errors.isEmpty()) {
+            if (!errors.isEmpty()) {
                 return next(ApiError.BadRequestError('Validation error', errors.array()));
+            }
+
+            const errors2 = validate(req.body);
+            if (errors2.error) {
+                return next(ApiError.BadRequestError('Validation error Joi:', errors2.error.details[0].message));
             }
 
             let userData = req.body;

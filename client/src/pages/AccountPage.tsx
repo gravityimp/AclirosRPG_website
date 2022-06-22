@@ -56,9 +56,7 @@ const styles = {
     }
 }
 
-const Thumb = () => {
-    return (<Box></Box>);
-}
+const testUUID = "541f9c44-29fd-442e-9fd6-bee08a3896b7";
 
 const AccountPage = () => {
 
@@ -81,7 +79,7 @@ const AccountPage = () => {
     return (
         <Paper elevation={2} sx={styles.paper}>
             <Paper elevation={4} sx={styles.flexRow}>
-                <img src={`${userImageURL}${player?.uuid}`} alt="img" style={{ width: '196px', height: '196px', alignSelf: 'start' }} />
+                <img src={`${userImageURL}${player?.uuid || testUUID}`} alt="img" style={{ width: '196px', height: '196px', alignSelf: 'start' }} />
                 <Box sx={{ ...styles.flexCol, ...styles.playerData }}>
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                         <Circle sx={{ marginX: '16px', color: player?.playData.isOnline ? '#00AA00' : '#AA0000' }} />{player?.name}

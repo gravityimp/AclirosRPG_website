@@ -3,7 +3,7 @@ const QuestService = require('../services/questService');
 class QuestController {
     async getAllQuests(req, res, next) {
         try {
-            const quests = await QuestService.getAllQuests();
+            const quests = await QuestService.getAllQuests(req.query);
             return res.json(quests);
         } catch (e) {
             next(e);

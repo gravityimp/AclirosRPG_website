@@ -40,25 +40,36 @@ const NpcList = () => {
     const [page, setPage] = useState<number>(0);
     const [lastPage, setLastPage] = useState<number>(0);
 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
 
     const lastElement = useRef<any>();
     const observer = useRef<any>();
 
-    const fetchNpcs = () => {
-        apiClient.get("api/npc", {
-            params: {
-                page: page,
-                limit: 20,
-                ...filter
-            }
-        }).then(res => {
-            setNpcList(res.data.data);
-            setLastPage(res.data.lastPage);
-        }).catch(err => {
-            enqueueSnackbar("Something went wrong when loading Npcs", { variant: "error" });
-        });
+    const fetchNpcs = async () => {
+        setIsLoading(true);
+        let response: any;
+        try {
+            response = await apiClient.get("api/npc", {
+                params: {
+                    page: page,
+                    limit: 20,
+                    ...filter
+                }
+            });
+        } catch (error) {
+
+        }
+        if (page === 0) {
+            setNpcList(response.data.data);
+            setLastPage(response.data.lastPage);
+        } else {
+            setNpcList([...npcList, ...response.data.data]);
+        }
+
+        setIsLoading(false);
     }
 
     useEffect(() => {
@@ -66,6 +77,8 @@ const NpcList = () => {
     }, [page, filter]);
 
     useEffect(() => {
+        if (isLoading) return;
+        if (observer.current) observer.current.disconnect();
         const options = {
             root: document,
         }
@@ -78,7 +91,7 @@ const NpcList = () => {
         };
         observer.current = new IntersectionObserver(callback, options);
         observer.current.observe(lastElement.current);
-    }, [])
+    }, [isLoading])
 
     return (
         <Paper 
@@ -127,7 +140,7 @@ const NpcList = () => {
             {
                 npcList.length === 0 &&
                  (
-                    <Typography variant="h3" sx={{ justifySelf: 'center', marginY: 'auto', fontWeight: "bold" }}>No NPC found</Typography>
+                    <Typography variant="h3" sx={{ justifySelf: 'center', marginY: 'auto', fontWeight: "bold" }}>No Npc found</Typography>
                  )
             }
             <div ref={lastElement} style={{ height: '10px', width: '100%', backgroundColor: 'transparent' }} />

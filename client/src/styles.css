@@ -13,4 +13,6 @@
 }
 .my-masonry-grid_column {
   background-clip: padding-box;
+  margin-left: 16px;
+  margin-right: 16px;
 }

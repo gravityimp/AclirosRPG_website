@@ -3,7 +3,7 @@ const MobService = require("../services/mobService");
 class MobController {
     async getAllMobs(req, res, next) {
         try {
-            const mobs = await MobService.getAllMobs();
+            const mobs = await MobService.getAllMobs(req.query);
             return res.json(mobs);
         } catch (e) {
             next(e);

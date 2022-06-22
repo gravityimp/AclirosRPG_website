@@ -1,5 +1,5 @@
 import { Add, ExpandMore } from "@mui/icons-material";
-import { Accordion, AccordionSummary, Typography, AccordionDetails, Button, Box, Fab } from "@mui/material";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, Button, Box, Fab, Chip } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -29,23 +29,38 @@ const AdminQuestList = () => {
     const [lastPage, setLastPage] = useState<number>(0);
     const [filter, setFilter] = useState<QuestFilter>({});
 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const lastElement = useRef<any>();
     const observer = useRef<any>();
 
     const fetchQuests = async () => {
-        apiClient.get("api/quests", {
-            params: {
-                page: page,
-                limit: 20,
-                ...filter
-            }
-        }).then(res => {
-            setQuestList(res.data.data);
-            setLastPage(res.data.lastPage);
-        });
+        setIsLoading(true);
+        let response: any;
+        try {
+            response = await apiClient.get("api/quests", {
+                params: {
+                    page: page,
+                    limit: 20,
+                    ...filter
+                }
+            });
+        } catch (error) {
+
+        }
+        if (page === 0) {
+            setQuestList(response.data.data);
+            setLastPage(response.data.lastPage);
+        } else {
+            setQuestList([...questList, ...response.data.data]);
+        }
+
+        setIsLoading(false);
     };
 
     useEffect(() => {
+        if (isLoading) return;
+        if (observer.current) observer.current.disconnect();
         const options = {
             root: document,
         }
@@ -58,18 +73,23 @@ const AdminQuestList = () => {
         };
         observer.current = new IntersectionObserver(callback, options);
         observer.current.observe(lastElement.current);
-    }, []);
+    }, [isLoading]);
+
+    useEffect(() => {
+        setPage(0);
+        fetchQuests();
+    }, [filter]);
 
     useEffect(() => {
         fetchQuests();
-    }, [filter, page]);
+    }, [page]);
 
     const deleteQuest = async (id: number) => {
         apiClient.delete(`api/quests/${id}`).then(res => {
-            fetchQuests();
+            setPage(0);
             enqueueSnackbar(`QUEST DELETED [${id}]`, { variant: "success" });
         }).then(res => {
-            enqueueSnackbar("Something went wrong", {variant: 'error'});
+            enqueueSnackbar("Something went wrong", { variant: 'error' });
         });
     };
 
@@ -81,6 +101,7 @@ const AdminQuestList = () => {
     const handleClose = () => {
         setIsEditMode(false);
         setQuestEdit(null);
+        setPage(0);
     }
 
     return (
@@ -88,13 +109,26 @@ const AdminQuestList = () => {
             <Box sx={{ width: '100%' }}>
                 <QuestFilterComponent filter={filter} setFilter={setFilter} />
             </Box>
+            {
+                questList.length === 0 && (
+                    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '16px' }}>
+                        <Typography variant="h4">No Quests Found</Typography>
+                    </Box>
+                )
+            }
             {questList.map((quest) => {
                 return (
                     <Accordion key={quest.id} sx={styles.accordion}>
                         <AccordionSummary
                             expandIcon={<ExpandMore />}
                         >
-                            <Typography>ID: {quest.id} NAME: {quest.name}</Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <Chip label={`ID: ${quest.id}`} />
+                                <Typography
+                                    sx={{
+                                        marginLeft: '8px',
+                                    }}>{quest.name}</Typography>
+                            </Box>
                         </AccordionSummary>
                         <AccordionDetails>
                             <Button color="success" onClick={() => navigate(`/quests/${quest.id}`)}>SHOW</Button>
@@ -105,11 +139,11 @@ const AdminQuestList = () => {
                 )
             })}
             <div ref={lastElement} style={{ height: '10px', width: '100%', backgroundColor: 'transparent' }} />
-            <EditModal isOpen={isEditMode} onClose={handleClose}>
+            <EditModal isOpen={isEditMode} onClose={handleClose} title={questEdit !== null ? `Edit Quest [${questEdit.id}]` : 'Create Quest'}>
                 <QuestForm editQuest={questEdit !== null ? questEdit : undefined} closeModal={handleClose} />
             </EditModal>
             <Fab
-                sx={{ position: 'absolute', bottom: '16px', right: '16px' }}
+                sx={{ position: 'fixed', bottom: '16px', right: '16px' }}
                 color="primary"
                 onClick={() => setIsEditMode(true)}
             >

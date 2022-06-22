@@ -28,7 +28,7 @@ import PreviewItem from "../Preview/PreviewItem";
 import { useSnackbar } from "notistack";
 import { minecraftItems } from "../../static/minecraftItems";
 import axios from "axios";
-import { styles } from "./styles";
+import { styles } from "./newstyles";
 
 interface ItemFormProps {
   closeModal: () => void;
@@ -60,7 +60,7 @@ const ItemForm: FC<ItemFormProps> = ({ closeModal, editItem }) => {
   };
 
   const validateName = () => {
-    if (name.length === 0 || name.length > 25) return false;
+    if (name.length === 0 || name.length > 34) return false;
     return true;
   };
 
@@ -89,7 +89,7 @@ const ItemForm: FC<ItemFormProps> = ({ closeModal, editItem }) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (!validateName()) {
-      enqueueSnackbar("Name of Item should be set(<26)!", {
+      enqueueSnackbar("Name of Item should be set(<34)!", {
         variant: "error",
         autoHideDuration: 2000
       });
@@ -152,131 +152,144 @@ const ItemForm: FC<ItemFormProps> = ({ closeModal, editItem }) => {
   }, []);
 
   return (
-    <Box sx={styles.box}>
-      <Box sx={styles.itemPreview}>
-        <PreviewItem item={buildItem()} />
-      </Box>
-      <Box sx={styles.formBox}>
-        <Box sx={styles.top}>
-          <IconButton onClick={closeModal}>
-            <Close />
-          </IconButton>
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        overflowY: "auto"
+      }}
+    >
+      <PreviewItem item={buildItem()} />
+      <form
+        style={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "start",
+          alignItems: "center"
+        }}
+      >
+        <Divider sx={styles.divider} />
+
+        <Typography variant="h5">General</Typography>
+        <TextField
+          label="Name"
+          placeholder="The Mighty Sword"
+          sx={styles.input}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">Name:</InputAdornment>
+            )
+          }}
+        />
+        <TextField
+          multiline
+          label="Lore"
+          placeholder="Lore"
+          sx={styles.input}
+          value={lore}
+          onChange={(e) => setLore(e.target.value)}
+        />
+        <Select
+          value={rarity}
+          onChange={(e: any) => setRarity(e.target.value)}
+          sx={styles.input}
+        >
+          <MenuItem value={RarityList.COMMON}>common</MenuItem>
+          <MenuItem value={RarityList.UNCOMMON}>uncommon</MenuItem>
+          <MenuItem value={RarityList.RARE}>rare</MenuItem>
+          <MenuItem value={RarityList.EPIC}>epic</MenuItem>
+          <MenuItem value={RarityList.LEGENDARY}>legendary</MenuItem>
+          <MenuItem value={RarityList.ARTIFACT}>artifact</MenuItem>
+        </Select>
+        <Autocomplete
+          autoSelect
+          disableClearable
+          value={item}
+          onChange={(event: any, newValue: any) => {
+            setItem(newValue);
+          }}
+          inputValue={inputItemValue}
+          onInputChange={(event, newInputValue) => {
+            setInputItemValue(newInputValue);
+          }}
+          options={minecraftItems}
+          getOptionLabel={(option) => option.displayName}
+          sx={styles.input}
+          renderInput={(params) => <TextField {...params} label="Item" />}
+        />
+        <Button
+          sx={{
+            ...styles.button,
+            backgroundColor: playerBound ? "#004FA3" : "#7A7A7A",
+            ":hover": {
+              backgroundColor: playerBound ? "#003B7A" : "#474747"
+            }
+          }}
+          variant="contained"
+          onClick={() => setPlayerBound(!playerBound)}
+        >
+          PlayerBound
+        </Button>
+        {itemType !== ItemType.MATERIAL &&
+          itemType !== ItemType.RECIPE && (
+            <RequirementsComponent
+              requirementsDetails={requirementsDetails}
+              setRequirementsDetails={setRequirementsDetails}
+            />
+          )}
+
+        <Divider sx={styles.divider} />
+
+        <Typography variant="h5">Type Specific</Typography>
+        <Select
+          id="select-item-type"
+          value={itemType}
+          onChange={handleChange}
+          sx={styles.input}
+        >
+          <MenuItem value={ItemType.WEAPON}>weapon</MenuItem>
+          <MenuItem value={ItemType.ARMOR}>armor</MenuItem>
+          <MenuItem value={ItemType.MATERIAL}>material</MenuItem>
+          <MenuItem value={ItemType.ACTION}>special</MenuItem>
+          <MenuItem value={ItemType.RECIPE}>recipe</MenuItem>
+        </Select>
+        {itemType === ItemType.WEAPON && (
+          <WeaponComponent
+            weaponDetails={weaponDetails}
+            setWeaponDetails={setWeaponDetails}
+          />
+        )}
+        {itemType === ItemType.ARMOR && (
+          <ArmorComponent
+            armorDetails={armorDetails}
+            setArmorDetails={setArmorDetails}
+          />
+        )}
+        <Divider sx={{ width: "90%", margin: "8px auto" }} />
+        <Box sx={styles.buttons}>
+          <Button
+            variant="contained"
+            color="success"
+            sx={styles.button}
+            onClick={handleSubmit}
+          >
+            Confirm
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            sx={styles.button}
+            onClick={closeModal}
+          >
+            Cancel
+          </Button>
         </Box>
-        <Typography sx={styles.formTitle}>Item Builder</Typography>
-        <form style={{ overflowY: "auto", width: "100%" }}>
-          <Divider sx={{ width: "90%", margin: "8px auto" }} />
-          <Box sx={styles.general}>
-            <Typography sx={styles.sectionTitle}>General</Typography>
-            <TextField
-              label="Name"
-              placeholder="The Mighty Sword"
-              sx={styles.formInput}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">Name:</InputAdornment>
-                )
-              }}
-            />
-            <Select
-              value={rarity}
-              onChange={(e: any) => setRarity(e.target.value)}
-              sx={styles.formInput}
-            >
-              <MenuItem value={RarityList.COMMON}>common</MenuItem>
-              <MenuItem value={RarityList.UNCOMMON}>uncommon</MenuItem>
-              <MenuItem value={RarityList.RARE}>rare</MenuItem>
-              <MenuItem value={RarityList.EPIC}>epic</MenuItem>
-              <MenuItem value={RarityList.LEGENDARY}>legendary</MenuItem>
-              <MenuItem value={RarityList.ARTIFACT}>artifact</MenuItem>
-            </Select>
-            <Autocomplete
-              autoSelect
-              disableClearable
-              value={item}
-              onChange={(event: any, newValue: any) => {
-                setItem(newValue);
-              }}
-              inputValue={inputItemValue}
-              onInputChange={(event, newInputValue) => {
-                setInputItemValue(newInputValue);
-              }}
-              options={minecraftItems}
-              getOptionLabel={(option) => option.displayName}
-              sx={styles.formInput}
-              renderInput={(params) => <TextField {...params} label="Item" />}
-            />
-            <Button
-              sx={{
-                ...styles.formInput,
-                backgroundColor: playerBound ? "#004FA3" : "#7A7A7A",
-                ":hover": {
-                  backgroundColor: playerBound ? "#003B7A" : "#474747"
-                }
-              }}
-              variant="contained"
-              onClick={() => setPlayerBound(!playerBound)}
-            >
-              PlayerBound
-            </Button>
-            {itemType !== ItemType.MATERIAL &&
-              itemType !== ItemType.RECIPE && (
-                <RequirementsComponent
-                  requirementsDetails={requirementsDetails}
-                  setRequirementsDetails={setRequirementsDetails}
-                />
-              )}
-          </Box>
-          <Divider sx={{ width: "90%", margin: "8px auto" }} />
-          <Box sx={styles.specific}>
-            <Typography sx={styles.sectionTitle}>Type Specific</Typography>
-            <Select
-              id="select-item-type"
-              value={itemType}
-              onChange={handleChange}
-              sx={styles.formInput}
-            >
-              <MenuItem value={ItemType.WEAPON}>weapon</MenuItem>
-              <MenuItem value={ItemType.ARMOR}>armor</MenuItem>
-              <MenuItem value={ItemType.MATERIAL}>material</MenuItem>
-              <MenuItem value={ItemType.ACTION}>special</MenuItem>
-              <MenuItem value={ItemType.RECIPE}>recipe</MenuItem>
-            </Select>
-            {itemType === ItemType.WEAPON && (
-              <WeaponComponent
-                weaponDetails={weaponDetails}
-                setWeaponDetails={setWeaponDetails}
-              />
-            )}
-            {itemType === ItemType.ARMOR && (
-              <ArmorComponent
-                armorDetails={armorDetails}
-                setArmorDetails={setArmorDetails}
-              />
-            )}
-          </Box>
-          <Divider sx={{ width: "90%", margin: "8px auto" }} />
-          <Box sx={styles.buttons}>
-            <Button
-              variant="contained"
-              color="success"
-              sx={styles.button}
-              onClick={handleSubmit}
-            >
-              Confirm
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              sx={styles.button}
-              onClick={closeModal}
-            >
-              Cancel
-            </Button>
-          </Box>
-        </form>
-      </Box>
+      </form>
     </Box>
   );
 };
